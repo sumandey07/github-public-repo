@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="title">GitHub Profile Finder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="styles.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <div class="app-shell">
+        <!-- ===== Hero / Search ===== -->
+        <header id="hero" class="hero">
+            <div class="hero-inner">
+                <div class="hero-badge">
+                    <i class="fa-brands fa-github"></i>
+                    <span>GitHub Explorer</span>
+                </div>
+                <h1 class="hero-title">Discover any developer on GitHub</h1>
+                <p class="hero-subtitle">Search a username to explore their profile and public repositories.</p>
+
+                <form id="form" class="search-form" autocomplete="off">
+                    <div class="search-field">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="username" class="search-input"
+                            placeholder="Enter a GitHub username, e.g. torvalds">
+                        <button id="submitBtn" type="submit" class="search-btn">
+                            <span>Search</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <small id="error" class="search-error"></small>
+                </form>
+            </div>
+
+            <a target="_blank" rel="noopener" href="https://www.github.com/sumandey07/fyle-assignment"
+                class="source-link">
+                <i class="fa-brands fa-github"></i>
+                <span>Source</span>
+            </a>
+        </header>
+
+        <!-- ===== Loader ===== -->
+        <div id="loader" class="loader-overlay">
+            <div class="loader-spinner"></div>
+            <p>Fetching data…</p>
+        </div>
+
+        <!-- ===== Results ===== -->
+        <main id="userDetails" class="results">
+            <!-- Profile card -->
+            <section class="profile-card">
+                <img id="profileImage" src="https://avatars.githubusercontent.com/u/0" class="profile-avatar"
+                    alt="Profile avatar">
+                <div class="profile-info">
+                    <div class="profile-heading">
+                        <h2 id="name" class="profile-name"></h2>
+                        <a id="login" class="profile-login" target="_blank" rel="noopener"></a>
+                    </div>
+                    <p id="bio" class="profile-bio"></p>
+
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span id="repoCount" class="stat-value">0</span>
+                            <span class="stat-label">Repositories</span>
+                        </div>
+                        <div class="stat">
+                            <span id="followers" class="stat-value">0</span>
+                            <span class="stat-label">Followers</span>
+                        </div>
+                        <div class="stat">
+                            <span id="following" class="stat-value">0</span>
+                            <span class="stat-label">Following</span>
+                        </div>
+                    </div>
+
+                    <ul class="profile-meta">
+                        <li id="locationItem" class="meta-item">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span id="location"></span>
+                        </li>
+                        <li id="companyItem" class="meta-item">
+                            <i class="fa-solid fa-building"></i>
+                            <span id="company"></span>
+                        </li>
+                        <li id="blogItem" class="meta-item">
+                            <i class="fa-solid fa-link"></i>
+                            <a id="profileLink" target="_blank" rel="noopener"></a>
+                        </li>
+                        <li id="twitterItem" class="meta-item">
+                            <i class="fa-brands fa-x-twitter"></i>
+                            <a id="twitterLink" target="_blank" rel="noopener"></a>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Repo toolbar -->
+            <section class="repo-toolbar">
+                <h3 class="section-title">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    Public Repositories
+                </h3>
+                <div class="toolbar-controls">
+                    <div class="control">
+                        <label for="perPageCounters">Show</label>
+                        <select id="perPageCounters" onchange="perPageCounter()">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div class="control search-repos">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" onkeyup="searchFunc()" id="searchRepos" placeholder="Search repositories" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- Repo grid -->
+            <section id="reposList" class="repos-grid"></section>
+
+            <!-- Empty state for repos -->
+            <p id="noRepos" class="no-repos">No repositories found.</p>
+
+            <!-- Pagination -->
+            <nav class="pagination-bar" aria-label="Repository pagination">
+                <button class="page-btn" onclick="paginate('prev')" id="prevPage" aria-label="Previous">
+                    <i class="fa-solid fa-chevron-left"></i>
+                    <span>Prev</span>
+                </button>
+                <span id="paginationCont" class="page-indicator"></span>
+                <button class="page-btn" id="nextPage" onclick="paginate('next')" aria-label="Next">
+                    <span>Next</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </nav>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="script.js"></script>
+</body>
+
+</html>
